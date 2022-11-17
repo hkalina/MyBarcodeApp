@@ -30,9 +30,16 @@ public class MainActivity extends AppCompatActivity {
     private TextView outputTextView;
     private BeepManager beepManager;
 
-    private BarcodeCallback callback = new BarcodeCallback() {
-        @Override
-        public void barcodeResult(BarcodeResult result) {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        outputTextView = findViewById(R.id.textView);
+        beepManager = new BeepManager(this);
+
+        barcodeView = findViewById(R.id.barcode_scanner);
+        barcodeView.getBarcodeView().setDecoderFactory(new DefaultDecoderFactory(null));
+        barcodeView.decodeContinuous(((BarcodeResult result) -> {
             if(result.getText() == null) {
                 return;
             }
@@ -41,28 +48,7 @@ public class MainActivity extends AppCompatActivity {
             beepManager.playBeepSoundAndVibrate();
 
             outputTextView.setText(result.getText());
-        }
-
-        @Override
-        public void possibleResultPoints(List<ResultPoint> resultPoints) {
-        }
-    };
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_main);
-
-        outputTextView = findViewById(R.id.textView);
-
-        barcodeView = findViewById(R.id.barcode_scanner);
-        Collection<BarcodeFormat> formats = Arrays.asList(BarcodeFormat.QR_CODE, BarcodeFormat.CODE_39);
-        barcodeView.getBarcodeView().setDecoderFactory(new DefaultDecoderFactory(formats));
-        barcodeView.initializeFromIntent(getIntent());
-        barcodeView.decodeContinuous(callback);
-
-        beepManager = new BeepManager(this);
+        }));
     }
 
     @Override
